@@ -32,4 +32,10 @@
         android:layout_height="wrap_content"
         android:onClick="updateFlag"
         android:text="use notification flag" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/forceUpdate"
+        android:text="force update" />
 </LinearLayout>

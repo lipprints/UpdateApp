@@ -1,7 +1,8 @@
 package me.shenfan.updateapp.sample;
 
 import android.app.Notification;
-import android.app.Service;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -9,15 +10,20 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import me.shenfan.updateapp.UpdateService;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int UPDATE = 1;
+
     private static final String URL = "http://27.221.81.15/dd.myapp.com/16891/63C4DA61823B87026BBC8C22BBBE212F.apk?mkey=575e443c53406290&f=8b5d&c=0&fsname=com.daimajia.gold_3.2.0_80.apk&p=.apk";
+    private ProgressDialog progressDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +41,51 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        findViewById(R.id.forceUpdate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO 开始下载
+                showUpdateDialog();
+            }
+        });
+
+    }
+
+
+    private void showUpdateDialog() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+        }
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setTitle("正在下载...");
+        progressDialog.setIcon(R.mipmap.ic_launcher);
+        progressDialog.setCancelable(false);
+        progressDialog.setMax(100);
+        progressDialog.show();
+        progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                //TODO 开启安装
+                Toast.makeText(MainActivity.this, "下载完成", Toast.LENGTH_SHORT).show();
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int i = 0;
+                while (i < 100) {
+                    try {
+                        Thread.sleep(200);
+                        //TODO 实际进度更新
+                        progressDialog.incrementProgressBy(1);
+                        i++;
+                    } catch (Exception e) {
+
+                    }
+                }
+                progressDialog.dismiss();
+            }
+        }).start();
     }
 
     @Override
@@ -43,11 +94,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void update(View view){
+    public void update(View view) {
         UpdateService.Builder.create(URL).build(this);
     }
 
-    public void updateFlag(View view){
+    public void updateFlag(View view) {
         UpdateService.Builder.create(URL)
                 .setStoreDir("update/flag")
                 .setDownloadSuccessNotificationFlag(Notification.DEFAULT_ALL)
@@ -55,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 .build(this);
     }
 
-    public void updateStore(View view){
+    public void updateStore(View view) {
         UpdateService.Builder.create(URL)
                 .setStoreDir("update/store")
                 .build(this);
